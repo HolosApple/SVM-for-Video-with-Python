@@ -1,0 +1,3 @@
+# SVM-for-Video-with-Python
+## Machine learning using Support Vector Machines on Video Data
+Information contained in video data can be analysed through classification models to identify optimization strategies. This project will utilize a dataset of a video of individuals performing squats. The model will be trained to observe proper form and technique and afterwards testing on a dataset to identify the robustness of the Suport vector machine classifier. A comparison with other classifiers will be conducted to understand the most potent classifer for supervised machine learning of video data.  
