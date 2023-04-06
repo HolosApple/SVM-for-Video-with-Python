@@ -1,0 +1,70 @@
+1.Read the JSON file and store the class labels and in_and_outs in a VidObj object.
+2.Examine JSON files in the video folder for each squat.
+3.Extract the necessary pose data from each JSON file and store it in a 2D numpy array.
+4.Check if the pose data matches the correct form, and output "Correct Squat" if it does.
+5.If the pose data does not match the correct form, check which incorrect form it matches and output the appropriate reason.
+
+import json
+import requests
+import pandas as pd
+import numpy as np
+import pathlib
+import glob
+
+# globals
+vid_details_root = 'F:\\WORK\DATASETS\\jk_data_only_22\\video_details\\'
+squat_root = 'F:\\WORK\DATASETS\\jk_data_only_22\\openposedata\\'
+
+class VidObj:
+    # init method or constructor
+    def __init__(self, class_labels, in_and_outs):
+        self.class_labels = class_labels
+        self.in_and_outs = in_and_outs
+        self.num_squats = len(class_labels)
+
+def read_json_meta(root_path, path):
+    with open(root_path + path, "r") as read_file:
+        data = json.load(read_file)
+        in_and_outs = ((data['squats'])[0])['in_and_out']
+        class_labels = ((data['squats'])[0])['class_label']
+        return VidObj(class_labels, in_and_outs)
+
+def read_squat(directory, end_frame, start_frame):
+    all_files = sorted(glob.glob(f"{directory}/*.json"))
+    pose_data = []
+    for i in range(start_frame, end_frame+1):
+        filename = all_files[i]
+        with open(filename) as f:
+            data = json.load(f)
+            # Extract only the necessary pose data
+            keypoints = data['people'][0]['pose_keypoints_2d']
+            pose_data.append(keypoints)
+    return np.array(pose_data)
+
+def check_squat(pose_data, correct_pose):
+    # Check if the pose data matches the correct form
+    if np.allclose(pose_data, correct_pose, atol=10):
+        return "Correct Squat"
+    else:
+        # Find which incorrect form it matches
+        if np.allclose(pose_data[0], correct_pose[0], atol=10):
+            return "Incorrect chin tuck"
+        elif np.allclose(pose_data[11:13], correct_pose[11:13], atol=10):
+            return "Incorrect lean forward"
+        elif np.allclose(pose_data[14:16], correct_pose[14:16], atol=10):
+            return "Incorrect feet close"
+        else:
+            return "Incorrect not low"
+
+# Read JSON file and store class labels and in_and_outs in VidObj object
+vo = read_json_meta(vid_details_root, 'J_J_09.json')
+
+# Get root filename and iterate through all JSON files in video folder for each squat
+video_folder = squat_root + 'J_09/'
+curr_files = sorted(pathlib.Path(video_folder).glob("*.json"))
+num_squats = vo.num_squats
+for i in range(num_squats):
+    start_frame = vo.in_and_outs[i*2]
+    end_frame = vo.in_and_outs[i*2 + 1]
+    correct_pose = np.load(f'correct_pose_{i}.npy')
+    pose_data = read_squat(video_folder, end_frame
