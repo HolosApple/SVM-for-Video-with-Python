@@ -26,8 +26,8 @@ def interp_row(row_0, numcols):
     f = interpolate.interp1d(t_old, row_0)
     t_new = np.linspace(0, len(row_0) - 1, num=numcols)
     ynew = f(t_new)
-    plt.plot(t_old, row_0, 'o', t_new, ynew, 'x')
-    plt.show()
+    #plt.plot(t_old, row_0, 'o', t_new, ynew, 'x')
+    #plt.show()
 
     return ynew
 
@@ -103,20 +103,46 @@ for i, file_path in enumerate(all_files_meta):
         all_labels.append(vo.class_labels[label_counter])
         label_counter = label_counter + 1
 
+all_squats_same_cols = []
+n = 50
 # Look up how to use pickle to save the 2 lists
+for i in range(0, len(all_squats)):
+    squat_1 = all_squats[i]
+    squat_1_new = np.zeros((18 * 2, n))
 
-squat_1 = all_squats[10]
-row_0 = squat_1[0,:]
-squat_1_new = np.zeros((18 * 2, 50))
+    for row in range(0, 18 * 2):
+        row_curr = squat_1[row, :]
+        row_interp = interp_row(row_curr, n)
+        squat_1_new[row, :] = row_interp
 
-for row in range(0,18 * 2):
-    row_curr = squat_1[row,:]
-    row_interp = interp_row(row_curr, 50)
-    squat_1_new[row,:] = row_interp
+    all_squats_same_cols.append(squat_1_new)
 
+# Sanity check
+#squat_0 = all_squats[5]
+#row_0 = squat_0[9, :]
+#squat_interp = all_squats_same_cols[5]
+#row_interp = squat_interp[9, :]
+#t_new = np.linspace(0, len(row_0) - 1, num=n)
+#t_old = np.linspace(0, len(row_0) - 1, num=len(row_0))
+#plt.plot(t_old, row_0, 'o', t_new, row_interp, 'x')
+#plt.show()
+#  End Sanity check
 
-ynew = interp_row(row_0, 50)
-
-
+# Next stage is to make X - where is column is a whole squat which 18 * 2 * 50 tall
+X = np.zeros((18 * 2 * n, len(all_squats_same_cols)));
+for i in range(0, len(all_squats_same_cols)):
+    squat_curr = all_squats_same_cols[i]
+    X[:, i] = squat_curr.flatten()
+    print(2)
 
 print(1)
+
+# Do PCA on X such that X still has num_squats (296?) columns but much less rows
+# Train SVM and get validation data with X and a new vector y that you make from the all_labels
+
+
+
+
+
+
+
