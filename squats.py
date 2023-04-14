@@ -82,7 +82,8 @@ def read_squat(directory, start_frame, end_frame):
             
     return pose_data
     
-    # if a squat matrix has less than 50 columns, the function pads the matrix with zeros to make it 50 columns wide. If a squat matrix has more than 50 columns, the function truncates it to have only the first 50 columns.
+    # if a squat matrix has less than 50 columns, the function pads the matrix with zeros to make it 50 columns wide. 
+    #If a squat matrix has more than 50 columns, the function truncates it to have only the first 50 columns.
     def preprocess_squats(squats):
     preprocessed_squats = []
     for squat in squats:
