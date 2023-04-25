@@ -4,15 +4,17 @@ import pathlib
 from scipy import interpolate
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report
 
 import matplotlib.pyplot as plt
 
 # globals
-#vid_details_root = 'F:\\WORK\\DATASETS\\jk_data_only_22\\video_details\\'
-#squat_root = 'F:\\WORK\\DATASETS\\jk_data_only_22\\openposedata\\'
+vid_details_root = 'F:\\WORK\\DATASETS\\jk_data_only_22\\video_details\\'
+squat_root = 'F:\\WORK\\DATASETS\\jk_data_only_22\\openposedata\\'
 
-vid_details_root = 'C:\\TEACHING\\DATASETS\\jk_data_only_22\\video_details\\'
-squat_root = 'C:\\TEACHING\\DATASETS\\jk_data_only_22\\openposedata\\'
+#vid_details_root = 'C:\\TEACHING\\DATASETS\\jk_data_only_22\\video_details\\'
+#squat_root = 'C:\\TEACHING\\DATASETS\\jk_data_only_22\\openposedata\\'
 
 class VidObj:
     def __init__(self, class_labels, in_and_outs):
@@ -105,15 +107,26 @@ for i in range(0, len(all_squats_same_cols)):
 # Do PCA on X such that X still has num_squats (296?) columns but much less rows
 # Train SVM and get validation data with X and a new vector y that you make from the all_labels
 #Use PCA to reduce the dimensionality of the squat data to 2 dimensions:
-pca = PCA(n_components=25)
-X_pca = pca.fit_transform(X.T) # Note X was transposed so that we now have 296 squats with each represented by 25 features
+#pca = PCA(n_components=0.95)
+#X_pca = pca.fit_transform(X.T) # Note X was transposed so that we now have 296 squats with each represented by 25 features
 
-#Train an SVM classifier on the PCA-transformed data:
+X_train,X_val,y_train,y_val = train_test_split(X.T,all_labels,random_state=0)
+print(X_train.shape,X_val.shape)
+
+pca = PCA(n_components=0.95)
+X_train_trans = pca.fit_transform(X_train)
+X_val_trans = pca.transform(X_val)
+print(X_train_trans.shape)
+
 svm = SVC()
-svm.fit(X_pca, all_labels)
+svm.fit(X_train_trans, y_train)
+pred_train = svm.predict(X_train_trans)
+pred_val = svm.predict(X_val_trans)
 
-
-print(1)
+print("train")
+print(classification_report(y_train,pred_train,zero_division=1))
+print("test")
+print(classification_report(y_val,pred_val,zero_division=1))
 
 
 
